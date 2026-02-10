@@ -1,0 +1,26 @@
+{{- if and .Values.persistence.enabled .Values.persistence.azureDisk.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "grupo118fasefinal.fullname" . }}-pv
+  labels:
+    {{- include "grupo118fasefinal.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size }}
+  accessModes:
+    {{- range .Values.persistence.accessModes }}
+    - {{ . }}
+    {{- end }}
+  persistentVolumeReclaimPolicy: {{ .Values.persistence.reclaimPolicy }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+  azureDisk:
+    kind: {{ .Values.persistence.azureDisk.kind }}
+    diskName: {{ .Values.persistence.azureDisk.diskName }}
+    diskURI: {{ .Values.persistence.azureDisk.diskURI }}
+    cachingMode: {{ .Values.persistence.azureDisk.cachingMode }}
+    fsType: {{ .Values.persistence.azureDisk.fsType }}
+    readOnly: {{ .Values.persistence.azureDisk.readOnly }}
+{{- end }}

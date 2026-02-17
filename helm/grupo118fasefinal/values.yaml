@@ -157,7 +157,7 @@ persistence:
   accessModes:
     - ReadWriteOnce
   # Storage class name (leave empty for default)
-  storageClassName: ""
+  storageClassName: managed-csi
   # Volume name to bind to (optional, for pre-provisioned PV)
   volumeName: ""
   # Reclaim policy for PV

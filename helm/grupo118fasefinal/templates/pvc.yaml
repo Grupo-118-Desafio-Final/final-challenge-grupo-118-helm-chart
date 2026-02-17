@@ -16,7 +16,4 @@ spec:
   {{- if .Values.persistence.storageClassName }}
   storageClassName: {{ .Values.persistence.storageClassName }}
   {{- end }}
-  {{- if .Values.persistence.volumeName }}
-  volumeName: {{ .Values.persistence.volumeName }}
-  {{- end }}
 {{- end }}

@@ -78,13 +78,16 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.volumeMounts }}
+          {{- if .Values.persistence.enabled }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
+            - name: "{{ include "grupo118fasefinal.fullname" . }}-storage"
+              mountPath: {{ .Values.persistence.mountPath }}
           {{- end }}
-      {{- with .Values.volumes }}
+      {{- if .Values.persistence.enabled }}
       volumes:
-        {{- toYaml . | nindent 8 }}
+        - name: "{{ include "grupo118fasefinal.fullname" . }}-storage"
+          persistentVolumeClaim:
+            claimName: {{ include "grupo118fasefinal.fullname" . }}-pvc
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -148,7 +148,7 @@ volumeMounts: []
 #   mountPath: "/etc/foo"
 #   readOnly: true
 
-# Persistence configuration for Azure Disk
+# Persistence configuration
 persistence:
   enabled: false
   # Size of the persistent volume
@@ -156,32 +156,10 @@ persistence:
   # Access modes for the PVC
   accessModes:
     - ReadWriteOnce
-  # Storage class name (leave empty for default)
-  storageClassName: ""
-  # Volume name to bind to (optional, for pre-provisioned PV)
-  volumeName: ""
-  # Reclaim policy for PV
-  reclaimPolicy: Retain
+  # Storage class name (use "managed-csi" for Azure Disk, or leave empty for default)
+  storageClassName: managed-csi
   # Mount path in the container
-  mountPath: /app/temp
-  # Subpath within the volume (optional)
-  subPath: ""
-  
-  # Azure Disk specific configuration
-  azureDisk:
-    enabled: true
-    # Managed or Dedicated
-    kind: Managed
-    # Name of the Azure disk (from Terraform)
-    diskName: ""
-    # Full resource ID of the disk (e.g., /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.Compute/disks/{disk-name})
-    diskURI: ""
-    # Caching mode: None, ReadOnly, or ReadWrite
-    cachingMode: ReadWrite
-    # File system type
-    fsType: ext4
-    # Read-only flag
-    readOnly: false
+  mountPath: /app/data
 
 nodeSelector: {}
 

@@ -316,20 +316,20 @@ readinessProbe:
   failureThreshold: 3
 ```
 
-### Volume Configuration
+### Persistence (Volume Configuration)
 
 The chart supports persistent volumes for stateful applications that need to store data.
 
-**Basic Volume Configuration:**
+**Basic Persistence Configuration:**
 
 ```yaml
-volume:
+persistence:
   enabled: true
-  name: "my-api-storage"
+  size: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi
   mountPath: /app/data
-  storageClassName: "default"
-  accessMode: ReadWriteOnce
-  size: 10Gi
 ```
 
 **Key Parameters:**
@@ -337,11 +337,10 @@ volume:
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `enabled` | Enable/disable persistent volume | `false` |
-| `name` | Name of the PVC | `""` |
+| `size` | Storage size request | `20Gi` |
+| `accessModes` | Volume access modes | `[ReadWriteOnce]` |
+| `storageClassName` | Storage class for PVC | `managed-csi` |
 | `mountPath` | Path where volume is mounted in container | `/app/data` |
-| `storageClassName` | Storage class for PVC | `"default"` |
-| `accessMode` | Volume access mode | `ReadWriteOnce` |
-| `size` | Storage size request | `10Gi` |
 
 **Access Modes:**
 - `ReadWriteOnce` (RWO) - Single node read-write
@@ -351,30 +350,31 @@ volume:
 **Example with File Storage:**
 
 ```yaml
-volume:
+persistence:
   enabled: true
-  name: "app-file-storage"
-  mountPath: /app/files
-  storageClassName: "azurefile"
-  accessMode: ReadWriteMany
   size: 50Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  mountPath: /app/files
 ```
 
 **Example with Database Storage:**
 
 ```yaml
-volume:
+persistence:
   enabled: true
-  name: "app-database"
-  mountPath: /var/lib/postgresql/data
-  storageClassName: "managed-premium"
-  accessMode: ReadWriteOnce
   size: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-premium
+  mountPath: /var/lib/postgresql/data
 ```
 
 **Important Notes:**
 - Ensure your cluster has the specified storage class available
 - `ReadWriteMany` requires storage classes that support it (e.g., Azure Files, NFS)
+- `managed-csi` is the recommended storage class for Azure Disk
 - Data persists across pod restarts and redeployments
 - Deleting the Helm release does not automatically delete the PVC
 

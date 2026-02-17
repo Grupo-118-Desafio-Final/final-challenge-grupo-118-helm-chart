@@ -164,6 +164,43 @@ readinessProbe:
   periodSeconds: 5
 ```
 
+### Persistence (Volumes)
+
+The chart supports persistent volumes for applications that need to store data:
+
+```yaml
+persistence:
+  enabled: true
+  size: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi  # Use "managed-csi" for Azure Disk
+  mountPath: /app/data
+```
+
+**Example Configuration:**
+
+```yaml
+persistence:
+  enabled: true
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi
+  mountPath: /app/files
+```
+
+When enabled, the chart will:
+- Create a PersistentVolumeClaim (PVC)
+- Mount the volume to the specified path in the container
+- Ensure data persists across pod restarts
+
+**Complete Examples:**
+
+See the [examples](examples/) directory for complete configuration files:
+- [`values-with-persistence.yaml`](examples/values-with-persistence.yaml) - Generic application with persistence
+- [`values-products-api.yaml`](examples/values-products-api.yaml) - Products API example based on fase 4 implementation
+
 ## Example Values for Different APIs
 
 ### Payment API
@@ -273,6 +310,11 @@ helm uninstall my-api
 | `resources.limits.memory` | Memory limit | `512Mi` |
 | `resources.requests.cpu` | CPU request | `250m` |
 | `resources.requests.memory` | Memory request | `256Mi` |
+| `persistence.enabled` | Enable persistent volume | `false` |
+| `persistence.size` | Size of the persistent volume | `20Gi` |
+| `persistence.accessModes` | Access modes for the PVC | `[ReadWriteOnce]` |
+| `persistence.storageClassName` | Storage class name | `managed-csi` |
+| `persistence.mountPath` | Mount path in the container | `/app/data` |
 
 ## Notes
 

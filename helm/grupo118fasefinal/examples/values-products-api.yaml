@@ -1,0 +1,119 @@
+# Example values file for Products API with Persistence
+# Based on: https://github.com/Grupo-118-Tech-Challenge-Fiap-11SOAT/tech-challenge-grupo-118-products-fase-4/blob/main/helm/values-production.yaml
+
+replicaCount: 1
+
+image:
+  repository: ${DOCKER_REGISTRY}
+  imageName: tech-challenge-grupo-118-products-fase-4
+  tag: "${POC_IMAGE_TAG}"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: tech-challenge-grupo-118-products-fase-4-acr-secret
+
+acrCredentials:
+  enabled: true
+  registry: "${DOCKER_REGISTRY}"
+  username: "${ACR_USERNAME}"
+  password: "${ACR_PASSWORD}"
+
+nameOverride: "tech-challenge-grupo-118-products-fase-4"
+fullnameOverride: "tech-challenge-grupo-118-products-fase-4"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "tech-challenge-grupo-118-products-fase-4-sa"
+
+service:
+  instances:
+    - name: tech-challenge-grupo-118-products-fase-4
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+
+internalIngress:
+  enabled: true
+  className: "nginx-internal-static"
+  path: /products-api(/|$)(.*)
+  pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  tls: []
+
+configMap:
+  enabled: false
+
+secret:
+  enabled: true
+  name: "tech-challenge-grupo-118-products-fase-4"
+  annotations: {}
+  data:
+    products-db-connectionstring: "${MongoDbSettings__ConnectionString}"
+    products-db-name: "${MongoDbSettings__DatabaseName}"
+  envVars:  
+    - name: MongoDbSettings__ConnectionString
+      secretKey: products-db-connectionstring
+    - name: MongoDbSettings__DatabaseName
+      secretKey: products-db-name
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /healthz  
+    port: 8080
+  initialDelaySeconds: 90
+  periodSeconds: 30
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 4
+
+readinessProbe:
+  httpGet:
+    path: /healthz  
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+# Persistence configuration
+# Enable this section if your application needs persistent storage
+persistence:
+  enabled: true
+  # Size of the persistent volume
+  size: 20Gi
+  # Access modes for the PVC
+  accessModes:
+    - ReadWriteOnce
+  # Storage class name - use "managed-csi" for Azure Disk
+  storageClassName: managed-csi
+  # Mount path in the container where data will be stored
+  mountPath: /app/data
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+

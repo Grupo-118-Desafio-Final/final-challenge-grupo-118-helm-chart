@@ -1,0 +1,121 @@
+# Example values file with persistence enabled
+# This example demonstrates how to configure an application with persistent storage
+
+replicaCount: 1
+
+image:
+  repository: ${DOCKER_REGISTRY}
+  imageName: my-app-with-storage
+  tag: "${IMAGE_TAG}"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: my-app-acr-secret
+
+acrCredentials:
+  enabled: true
+  registry: "${DOCKER_REGISTRY}"
+  username: "${ACR_USERNAME}"
+  password: "${ACR_PASSWORD}"
+
+nameOverride: "my-app-with-storage"
+fullnameOverride: "my-app-with-storage"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "my-app-with-storage-sa"
+
+service:
+  instances:
+    - name: my-app-with-storage-service
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+
+internalIngress:
+  enabled: true
+  className: "nginx-internal-static"
+  path: /my-app(/|$)(.*)
+  pathType: ImplementationSpecific
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  tls: []
+
+# Configure secrets if needed
+secret:
+  enabled: true
+  name: "my-app-with-storage-secret"
+  envVars:
+    - name: DATABASE_PASSWORD
+      secretKey: db-password
+  data:
+    db-password: "${DATABASE_PASSWORD}"
+
+# Configure config maps if needed
+configMap:
+  enabled: true
+  name: "my-app-with-storage-config"
+  envVars:
+    - name: DATABASE_HOST
+      configMapKey: db-host
+  data:
+    db-host: "localhost"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+# Persistence configuration - IMPORTANT: All fields should be filled
+persistence:
+  enabled: true
+  # Size of the persistent volume
+  size: 20Gi
+  # Access modes for the PVC (ReadWriteOnce for single-node, ReadWriteMany for multi-node)
+  accessModes:
+    - ReadWriteOnce
+  # Storage class name - use "managed-csi" for Azure Disk
+  storageClassName: managed-csi
+  # Mount path in the container where the volume will be mounted
+  mountPath: /app/data
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+

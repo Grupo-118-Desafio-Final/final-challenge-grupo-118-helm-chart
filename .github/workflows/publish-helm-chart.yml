@@ -42,7 +42,7 @@ jobs:
               echo "HELM_VERSION=$VERSION" >> $GITHUB_ENV
 
           - name: Push Helm chart to ACR
-            if: (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main') && github.event_name == 'push'
+            if: (github.ref == 'refs/heads/main') && github.event_name == 'push'
             run: |
               helm registry login ${{ env.REGISTRY }} --username ${{ env.ACR_USERNAME }} --password ${{ env.ACR_PASSWORD }}
               helm push ${{ env.HELM_CHART_NAME }}-${{ env.HELM_VERSION }}.tgz oci://${{ env.REGISTRY }}/helm   

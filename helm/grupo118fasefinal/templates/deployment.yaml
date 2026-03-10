@@ -41,10 +41,12 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}/{{ .Values.image.imageName }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if and .Values.service .Values.service.instances }}
           ports:
             - name: http
               containerPort: {{ (.Values.service.instances | first).targetPort | default 8080 }}
               protocol: TCP
+          {{- end }}
           {{- if or .Values.secret.enabled .Values.configMap.enabled }}
           env:
             {{- if .Values.secret.enabled }}

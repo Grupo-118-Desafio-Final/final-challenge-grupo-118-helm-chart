@@ -1,4 +1,4 @@
-{{- if .Values.service }}
+{{- if and .Values.service .Values.service.instances }}
 {{- range $service := .Values.service.instances }}
 ---
 apiVersion: v1
